@@ -1,0 +1,138 @@
+appId: com.anyosstack.app
+productName: AnyOSStack
+copyright: Copyright (c) AnyOSStack contributors. GPL-3.0-or-later.
+
+# Only the files the packaged app actually needs. The renderer is plain
+# HTML/CSS/JS (no bundler), so it is copied as-is into app.asar.
+files:
+  - src/**/*
+  - "!src/renderer/**/*.map"
+
+directories:
+  buildResources: build
+  output: release
+
+# Publish target: GitHub Releases (drives electron-updater from v1.1+).
+# GitHub owner (drives Releases + electron-updater).
+publish:
+  provider: github
+  owner: tweedlex754
+  repo: AnyOSStack
+
+# ----------------------------- Windows -----------------------------
+win:
+  target:
+    - target: nsis
+    - target: portable
+  icon: build/icon.ico
+  # No requestedExecutionLevel: the app runs unelevated; elevation is requested
+  # contextually only when a "Run Now" install needs it.
+
+nsis:
+  oneClick: false                       # assisted wizard so the branded pages show
+  perMachine: false                     # per-user install: no UAC just to install
+  allowElevation: true                  # user may still opt into a machine-wide install
+  allowToChangeInstallationDirectory: true
+  multiLanguageInstaller: true          # auto-select the user's Windows UI language
+  displayLanguageSelector: true
+  installerLanguages:
+    - en_US
+    - tr_TR
+    - de_DE
+    - fr_FR
+    - es_ES
+    - pt_BR
+    - it_IT
+    - ru_RU
+    - zh_CN
+    - ja_JP
+    - ar_SA
+    - hi_IN
+  installerIcon: build/installerIcon.ico
+  uninstallerIcon: build/uninstallerIcon.ico
+  installerHeaderIcon: build/installerHeaderIcon.ico
+  installerSidebar: build/installerSidebar.bmp
+  uninstallerSidebar: build/installerSidebar.bmp
+  installerHeader: build/installerHeader.bmp
+  include: build/installer.nsh
+  license: LICENSE
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: AnyOSStack
+  artifactName: ${productName}-Setup-${version}.${ext}
+
+portable:
+  artifactName: ${productName}-${version}-portable.${ext}
+
+# ------------------------------ macOS ------------------------------
+mac:
+  target:
+    - dmg
+  icon: build/icon.icns
+  category: public.app-category.utilities
+  darkModeSupport: true
+  # Unsigned by default. Provide an Apple Developer ID + notarization here as a
+  # fast-follow; until then Gatekeeper shows the "unidentified developer" prompt
+  # (documented in the README).
+  hardenedRuntime: false
+  gatekeeperAssess: false
+  extendInfo:
+    CFBundleLocalizations:
+      - en
+      - tr
+      - de
+      - fr
+      - es
+      - pt
+      - it
+      - ru
+      - zh
+      - ja
+      - ar
+      - hi
+    CFBundleDevelopmentRegion: en
+
+dmg:
+  background: build/dmg-background.png
+  icon: build/icon.icns
+  window:
+    width: 660
+    height: 400
+  contents:
+    - x: 180
+      y: 220
+      type: file
+    - x: 480
+      y: 220
+      type: link
+      path: /Applications
+  artifactName: ${productName}-${version}.${ext}
+
+# ------------------------------ Linux ------------------------------
+linux:
+  target:
+    - AppImage
+    - deb
+    - rpm
+  icon: build/icons
+  category: Utility
+  synopsis: One stack for every OS - cross-platform app installer & script generator
+  description: >-
+    AnyOSStack lets you pick applications from a curated catalog and get one
+    idempotent install script for Windows (winget), macOS (Homebrew), or Linux
+    (apt/dnf/pacman/flatpak) - or run it in-app.
+  desktop:
+    entry:
+      Name: AnyOSStack
+      Comment: Pick your apps, get one install script for every OS.
+      # Localized Name[xx]/Comment[xx] entries are generated into
+      # build/linux-desktop.yml by scripts/build-installer-lang.js; paste them
+      # here to localize the desktop menu entry.
+      Categories: Utility;System;
+      Keywords: installer;packages;winget;homebrew;apt;automation;
+  artifactName: ${productName}-${version}-${arch}.${ext}
+
+deb:
+  packageCategory: utils
+rpm:
+  packageCategory: Applications/System

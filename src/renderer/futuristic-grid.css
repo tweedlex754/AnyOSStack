@@ -1,0 +1,2160 @@
+/* AnyOSStack — futuristic grid interface
+   A desktop-first shell adapted from the supplied visual reference. This file
+   intentionally loads last so the existing application logic, accessibility
+   hooks and Electron-only controls keep working while the presentation changes. */
+
+:root {
+  --sidebar-w: 280px;
+  --topbar-h: 64px;
+  --footer-h: 80px;
+  --shell-top: 0px;
+  --font-display: 'Hanken Grotesk', ui-sans-serif, system-ui, sans-serif;
+  --font-body: 'Hanken Grotesk', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'Spline Sans Mono', ui-monospace, monospace;
+  --r-xs: 4px;
+  --r-sm: 6px;
+  --r-int: 8px;
+  --r-md: 10px;
+  --r-lg: 14px;
+  --glass-blur: blur(16px) saturate(150%);
+  --t: 0.18s cubic-bezier(.2, 0, .2, 1);
+  --t-slow: 0.3s cubic-bezier(.2, .7, .2, 1);
+  --t-int: color var(--t), background-color var(--t), border-color var(--t),
+           box-shadow var(--t), transform var(--t), opacity var(--t);
+}
+
+html.aos-app {
+  --shell-top: var(--aos-titlebar-h);
+}
+
+:root[data-theme='dark'] {
+  --canvas: #131313;
+  --surface: #171717;
+  --surface-solid: #1c1b1b;
+  --elevated: #201f1f;
+  --card: #232222;
+  --deep: #0e0e0e;
+  --glass: rgba(19, 19, 19, .78);
+  --glass-edge: rgba(255, 255, 255, .065);
+  --hairline: rgba(228, 190, 180, .22);
+  --hairline-soft: rgba(255, 255, 255, .07);
+  --hairline-strong: rgba(228, 190, 180, .38);
+  --ink: #e9e5e3;
+  --ink-2: #c7c0bd;
+  --charcoal: #f2edeb;
+  --body: #d1c9c6;
+  --mute: #a48f89;
+  --stone: #786964;
+  --ash: #5d5350;
+  --primary: #ff8a64;
+  --primary-pressed: #ffb5a0;
+  --primary-soft: rgba(255, 87, 34, .14);
+  --on-primary: #321006;
+  --grad: linear-gradient(135deg, #ff5722, #ff7a46);
+  --grad-soft: linear-gradient(135deg, rgba(255, 87, 34, .16), rgba(255, 138, 100, .04));
+  --blue: #81ecff;
+  --blue-soft: rgba(0, 227, 253, .12);
+  --blue-ink: #bdf4ff;
+  --red: #ff8178;
+  --red-soft: rgba(255, 129, 120, .13);
+  --green: #63e59d;
+  --green-soft: rgba(99, 229, 157, .12);
+  --yellow: #ffd166;
+  --yellow-soft: rgba(255, 209, 102, .12);
+  --code-bg: #0e0e0e;
+  --code-ink: #bdf4ff;
+  --scrim: rgba(0, 0, 0, .72);
+  --cv-a: #ff5722;
+  --cv-b: #ff9f43;
+  --cv-c: #8d5cff;
+  --cv-alpha: .45;
+  --sh-1: 0 8px 20px rgba(0, 0, 0, .18);
+  --sh-2: 0 16px 38px rgba(0, 0, 0, .28);
+  --sh-3: 0 24px 70px rgba(0, 0, 0, .46);
+  --sh-ring: 0 0 0 3px rgba(255, 87, 34, .16);
+  --sh-glow: 0 0 18px rgba(255, 87, 34, .28);
+  --page-glow: none;
+}
+
+:root[data-theme='light'] {
+  --canvas: #f5f3f2;
+  --surface: #fbf9f8;
+  --surface-solid: #ffffff;
+  --elevated: #eee9e7;
+  --card: #ffffff;
+  --deep: #e8e2df;
+  --glass: rgba(255, 255, 255, .82);
+  --glass-edge: rgba(72, 43, 34, .09);
+  --hairline: rgba(72, 43, 34, .18);
+  --hairline-soft: rgba(72, 43, 34, .08);
+  --hairline-strong: rgba(72, 43, 34, .3);
+  --ink: #261a16;
+  --ink-2: #51423d;
+  --charcoal: #261a16;
+  --body: #443732;
+  --mute: #74645e;
+  --stone: #988882;
+  --ash: #b8aaa4;
+  --primary: #c93c0d;
+  --primary-pressed: #9f2d09;
+  --primary-soft: rgba(201, 60, 13, .11);
+  --on-primary: #ffffff;
+  --grad: linear-gradient(135deg, #d84315, #ff6b35);
+  --grad-soft: linear-gradient(135deg, rgba(216, 67, 21, .13), rgba(255, 107, 53, .03));
+  --blue: #007f91;
+  --blue-soft: rgba(0, 127, 145, .1);
+  --blue-ink: #006a79;
+  --red: #c93631;
+  --red-soft: rgba(201, 54, 49, .1);
+  --green: #147a45;
+  --green-soft: rgba(20, 122, 69, .1);
+  --yellow: #9d6800;
+  --yellow-soft: rgba(157, 104, 0, .1);
+  --code-bg: #201a18;
+  --code-ink: #bdf4ff;
+  --scrim: rgba(28, 18, 14, .46);
+  --cv-a: #ff713e;
+  --cv-b: #f6a33a;
+  --cv-c: #8d5cff;
+  --cv-alpha: .2;
+  --sh-1: 0 8px 24px rgba(74, 45, 34, .08);
+  --sh-2: 0 16px 40px rgba(74, 45, 34, .12);
+  --sh-3: 0 24px 70px rgba(74, 45, 34, .18);
+  --sh-ring: 0 0 0 3px rgba(201, 60, 13, .12);
+  --sh-glow: 0 0 18px rgba(201, 60, 13, .2);
+  --page-glow: none;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--canvas);
+}
+
+body,
+html.aos-app body {
+  min-height: 100vh;
+  padding-top: var(--shell-top);
+  padding-bottom: calc(var(--footer-h) + 24px);
+  overflow-x: hidden;
+  color: var(--body);
+  background-color: var(--canvas);
+  background-image:
+    linear-gradient(rgba(255, 255, 255, .025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, .025) 1px, transparent 1px);
+  background-size: 40px 40px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  letter-spacing: 0;
+}
+
+:root[data-theme='light'] body {
+  background-image:
+    linear-gradient(rgba(72, 43, 34, .035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(72, 43, 34, .035) 1px, transparent 1px);
+}
+
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--surface);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--primary);
+  border: 2px solid var(--surface);
+  border-radius: 999px;
+}
+
+::selection {
+  color: var(--on-primary);
+  background: var(--primary);
+}
+
+/* Electron frame */
+.aos-titlebar {
+  background: #0e0e0e;
+  border-bottom-color: rgba(255, 255, 255, .06);
+}
+
+.aos-titlebar .aos-brand b {
+  font-family: var(--font-body);
+  font-size: 12px;
+  letter-spacing: .03em;
+}
+
+/* Sidebar brand */
+.side-brand {
+  position: fixed;
+  z-index: 150;
+  top: var(--shell-top);
+  left: 0;
+  width: var(--sidebar-w);
+  height: 88px;
+  padding: 18px 18px 14px;
+  background: var(--surface);
+  border-right: 1px solid var(--glass-edge);
+}
+
+.side-brand a {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 100%;
+}
+
+.side-brand .brand-mark {
+  width: 42px;
+  height: 42px;
+  padding: 7px;
+  color: var(--primary);
+  background: var(--elevated);
+  border: 1px solid color-mix(in srgb, var(--primary) 30%, transparent);
+  border-radius: 9px;
+  box-shadow: var(--sh-glow);
+}
+
+.side-brand .brand-mark rect:nth-child(1) {
+  fill: var(--primary);
+}
+
+.side-brand .brand-mark rect:nth-child(2) {
+  fill: #ff5722;
+}
+
+.side-brand .brand-mark rect:nth-child(3) {
+  fill: var(--ink);
+}
+
+.side-brand-copy {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  line-height: 1.1;
+}
+
+.side-brand-copy strong {
+  overflow: hidden;
+  color: var(--primary);
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -.035em;
+  text-overflow: ellipsis;
+}
+
+.side-brand-copy small {
+  margin-top: 6px;
+  color: var(--mute);
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  font-weight: 600;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+/* Top navigation */
+.masthead,
+html.aos-app .masthead {
+  position: fixed;
+  z-index: 120;
+  top: var(--shell-top);
+  right: 0;
+  left: var(--sidebar-w);
+  height: var(--topbar-h);
+  background: color-mix(in srgb, var(--canvas) 78%, transparent);
+  border: 0;
+  border-bottom: 1px solid var(--hairline);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+}
+
+.masthead-in {
+  width: 100%;
+  max-width: none;
+  height: 100%;
+  padding: 0 24px;
+  gap: 12px;
+}
+
+.masthead .wordmark {
+  display: none;
+}
+
+.masthead .seg {
+  height: 100%;
+  padding: 0;
+  gap: 0;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+}
+
+.masthead .seg-view {
+  margin-right: auto;
+}
+
+.masthead .seg button {
+  position: relative;
+  height: 100%;
+  min-width: 88px;
+  padding: 0 16px;
+  color: var(--mute);
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.masthead .seg button::after {
+  position: absolute;
+  right: 12px;
+  bottom: 0;
+  left: 12px;
+  height: 2px;
+  content: '';
+  background: transparent;
+}
+
+.masthead .seg button:hover {
+  color: var(--ink);
+  background: var(--hairline-soft);
+}
+
+.masthead .seg button.active {
+  color: var(--primary);
+  background: transparent;
+  border-color: transparent;
+}
+
+.masthead .seg button.active::after {
+  background: var(--primary);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--primary) 50%, transparent);
+}
+
+.masthead .seg-view svg {
+  display: none;
+}
+
+#themeToggle {
+  height: 34px;
+  padding: 3px;
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  border-radius: 8px;
+}
+
+#themeToggle button {
+  min-width: 34px;
+  height: 26px;
+  padding: 0;
+  border-radius: 5px;
+}
+
+#themeToggle button::after {
+  display: none;
+}
+
+#themeToggle button.active {
+  color: var(--primary);
+  background: var(--elevated);
+}
+
+#themeToggle button svg {
+  width: 16px;
+  height: 16px;
+}
+
+.mast-link {
+  color: var(--mute);
+  font-size: 13px;
+}
+
+.mast-link:hover {
+  color: var(--primary);
+  background: var(--primary-soft);
+}
+
+.lang-select {
+  height: 34px;
+  padding: 0 30px 0 11px;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  border-radius: 8px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+.menu-btn {
+  width: 36px;
+  height: 36px;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  border-radius: 8px;
+}
+
+.menu-btn:hover,
+.menu-btn[aria-expanded='true'] {
+  color: var(--on-primary);
+  background: var(--primary);
+  border-color: var(--primary);
+}
+
+/* Main shell */
+.wrap,
+html.aos-app .wrap {
+  width: calc(100% - var(--sidebar-w));
+  max-width: none;
+  min-height: 100vh;
+  margin: 0 0 0 var(--sidebar-w);
+  padding: calc(var(--topbar-h) + 24px) 24px 30px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas:
+    "bar"
+    "cover"
+    "osiso"
+    "desec"
+    "groups"
+    "empty"
+    "foot";
+  gap: 24px;
+  align-content: start;
+}
+
+.cover {
+  grid-area: cover;
+}
+
+.orderbar {
+  grid-area: bar;
+}
+
+.osiso {
+  grid-area: osiso;
+}
+
+.desec {
+  grid-area: desec;
+}
+
+#groups {
+  grid-area: groups;
+}
+
+.empty {
+  grid-area: empty;
+}
+
+.foot {
+  grid-area: foot;
+}
+
+/* Fixed left navigation */
+.shipto {
+  position: fixed;
+  z-index: 140;
+  top: calc(var(--shell-top) + 88px);
+  bottom: auto;
+  left: 0;
+  width: var(--sidebar-w);
+  min-height: 180px;
+  padding: 14px 16px 18px;
+  background: var(--surface);
+  border-right: 1px solid var(--glass-edge);
+}
+
+.shipto-label,
+.cats::before {
+  display: block;
+  margin: 0 0 8px;
+  padding: 0 8px;
+  color: var(--mute);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+}
+
+.os-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.os-btn {
+  width: 100%;
+  min-width: 0;
+  height: 40px;
+  justify-content: flex-start;
+  padding: 0 12px;
+  color: var(--mute);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  box-shadow: none;
+  font-size: 13px;
+  font-weight: 600;
+  transition: var(--t-int);
+}
+
+.os-btn > span:first-child {
+  width: 20px;
+  height: 20px;
+}
+
+.os-btn:hover {
+  color: var(--ink);
+  background: var(--elevated);
+  transform: none;
+  box-shadow: none;
+}
+
+.os-btn[aria-pressed='true'] {
+  color: var(--on-primary);
+  background: var(--grad);
+  border-color: var(--primary);
+  box-shadow: 0 8px 22px var(--primary-soft);
+}
+
+.os-btn[aria-pressed='true']::after,
+.os-btn::after {
+  display: none;
+}
+
+.distro-row {
+  width: 100%;
+  margin-top: 8px;
+  padding: 8px;
+  gap: 5px;
+  flex-wrap: wrap;
+  background: var(--deep);
+  border: 1px solid var(--hairline-soft);
+  border-radius: 9px;
+}
+
+.distro-btn {
+  height: 26px;
+  padding: 0 8px;
+  color: var(--mute);
+  background: var(--elevated);
+  border: 1px solid var(--hairline-soft);
+  border-radius: 5px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+}
+
+.distro-btn[aria-pressed='true'] {
+  color: var(--primary);
+  background: var(--primary-soft);
+  border-color: color-mix(in srgb, var(--primary) 50%, transparent);
+}
+
+.cats {
+  position: fixed;
+  z-index: 140;
+  top: calc(var(--shell-top) + 282px);
+  bottom: 0;
+  left: 0;
+  width: var(--sidebar-w);
+  padding: 14px 14px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow-y: auto;
+  background: var(--surface);
+  border-right: 1px solid var(--glass-edge);
+}
+
+.cats::before {
+  content: 'Categories';
+}
+
+.cat {
+  width: 100%;
+  min-height: 38px;
+  padding: 0 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  color: var(--mute);
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  text-align: left;
+  transition: var(--t-int);
+}
+
+.cat:hover {
+  color: var(--ink);
+  background: var(--elevated);
+  transform: none;
+}
+
+.cat[aria-pressed='true'] {
+  color: var(--primary);
+  background: var(--primary-soft);
+}
+
+.cat-main {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 10px;
+}
+
+.cat-main > span:last-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cat-icon {
+  width: 20px;
+  color: currentColor;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  text-align: center;
+}
+
+.cat-count {
+  min-width: 28px;
+  padding: 2px 6px;
+  color: var(--mute);
+  background: var(--elevated);
+  border: 1px solid var(--hairline-soft);
+  border-radius: 5px;
+  font-size: 9px;
+  text-align: center;
+}
+
+.cat[aria-pressed='true'] .cat-count {
+  color: var(--primary);
+  background: color-mix(in srgb, var(--primary-soft) 75%, var(--surface));
+  border-color: color-mix(in srgb, var(--primary) 25%, transparent);
+}
+
+/* Search and toolbar */
+.orderbar {
+  position: relative;
+  z-index: 10;
+  top: auto;
+  width: 100%;
+  padding: 0;
+  display: flex;
+  gap: 10px;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+.search {
+  position: relative;
+  flex: 1 1 360px;
+}
+
+.search::before,
+.osiso-search::before {
+  position: absolute;
+  z-index: 1;
+  top: 50%;
+  left: 15px;
+  width: 18px;
+  height: 18px;
+  content: '';
+  transform: translateY(-50%);
+  background-color: var(--mute);
+  -webkit-mask: var(--ico-search) center / contain no-repeat;
+  mask: var(--ico-search) center / contain no-repeat;
+}
+
+.search input,
+.osiso-search input {
+  width: 100%;
+  height: 46px;
+  padding: 0 16px 0 46px;
+  color: var(--ink);
+  background: var(--deep);
+  border: 1px solid var(--hairline);
+  border-radius: 10px;
+  box-shadow: inset 2px 2px 7px rgba(0, 0, 0, .22), inset -1px -1px 3px rgba(255, 255, 255, .025);
+  font-size: 14px;
+}
+
+.search input:focus,
+.osiso-search input:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 2px var(--blue-soft), inset 2px 2px 7px rgba(0, 0, 0, .22);
+  outline: 0;
+}
+
+.btn,
+.btn-ghost {
+  min-height: 40px;
+  padding: 0 15px;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  border-radius: 7px;
+  box-shadow: none;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .045em;
+  white-space: nowrap;
+  text-transform: uppercase;
+  transition: var(--t-int);
+}
+
+.btn:hover,
+.btn-ghost:hover {
+  color: var(--primary);
+  background: var(--primary-soft);
+  border-color: color-mix(in srgb, var(--primary) 60%, transparent);
+  transform: translateY(-1px);
+  box-shadow: var(--sh-glow);
+}
+
+.btn:active,
+.btn-ghost:active {
+  transform: translateY(0);
+}
+
+.btn-primary {
+  color: var(--on-primary);
+  background: var(--grad);
+  border-color: var(--primary);
+  box-shadow: 0 10px 26px var(--primary-soft);
+}
+
+.btn-primary:hover {
+  color: var(--on-primary);
+  background: var(--grad);
+}
+
+.btn:disabled,
+.btn-ghost:disabled {
+  color: var(--ash);
+  background: var(--elevated);
+  border-color: var(--hairline-soft);
+  box-shadow: none;
+  opacity: .6;
+  transform: none;
+}
+
+#genBtn {
+  display: none;
+}
+
+/* Hero */
+.cover,
+html.aos-app .cover {
+  position: relative;
+  min-height: 240px;
+  padding: 30px 350px 30px 30px;
+  display: flex !important;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-end;
+  overflow: hidden;
+  text-align: left;
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--canvas) 96%, transparent) 0%, color-mix(in srgb, var(--canvas) 82%, transparent) 48%, transparent 100%),
+    var(--surface);
+  border: 1px solid var(--hairline);
+  border-radius: 14px;
+  box-shadow: var(--sh-2);
+}
+
+.cover::after {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  content: '';
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 82% 46%, transparent 0 34px, rgba(255, 87, 34, .45) 35px 36px, transparent 37px 62px, rgba(255, 138, 100, .2) 63px 64px, transparent 65px),
+    linear-gradient(120deg, transparent 44%, rgba(255, 87, 34, .05));
+}
+
+.cover-canvas {
+  position: absolute;
+  z-index: 0;
+  inset: -20%;
+  width: 130%;
+  max-width: none;
+  height: 140%;
+  opacity: .7;
+  pointer-events: none;
+  -webkit-mask-image: linear-gradient(90deg, transparent 4%, rgba(0, 0, 0, .12) 42%, #000 100%);
+  mask-image: linear-gradient(90deg, transparent 4%, rgba(0, 0, 0, .12) 42%, #000 100%);
+}
+
+.cover > *:not(.cover-canvas) {
+  position: relative;
+  z-index: 2;
+}
+
+.eyebrow {
+  margin: 0 0 14px;
+  padding: 4px 8px;
+  color: var(--primary);
+  background: var(--primary-soft);
+  border: 0;
+  border-radius: 5px;
+  box-shadow: none;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: .06em;
+  text-transform: none;
+}
+
+.eyebrow::before {
+  display: none;
+}
+
+.cover h1 {
+  max-width: 700px;
+  margin: 0 0 8px;
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: clamp(32px, 4vw, 48px);
+  font-weight: 800;
+  line-height: 1.08;
+  letter-spacing: -.035em;
+  text-wrap: balance;
+}
+
+.cover h1 mark {
+  color: var(--ink);
+  background: none;
+  -webkit-background-clip: initial;
+  background-clip: initial;
+  -webkit-text-fill-color: currentColor;
+}
+
+.cover .sub {
+  max-width: 650px;
+  margin: 0;
+  color: var(--mute);
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+.hero-stats {
+  position: absolute !important;
+  right: 26px;
+  bottom: 26px;
+  display: flex;
+  gap: 10px;
+}
+
+.hero-stat {
+  width: 94px;
+  min-height: 76px;
+  padding: 12px 8px;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  justify-content: center;
+  background: color-mix(in srgb, var(--elevated) 60%, transparent);
+  border: 1px solid var(--glass-edge);
+  border-radius: 10px;
+  -webkit-backdrop-filter: blur(12px) saturate(160%);
+  backdrop-filter: blur(12px) saturate(160%);
+}
+
+.hero-stat strong {
+  color: var(--ink);
+  font-size: 27px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.hero-stat small {
+  margin-top: 8px;
+  color: var(--mute);
+  font-family: var(--font-mono);
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: .08em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+/* App groups and cards */
+#groups {
+  min-width: 0;
+}
+
+.sec {
+  margin: 0 0 30px;
+}
+
+.sec-head {
+  min-height: 28px;
+  margin: 0 0 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sec-head .sec-no {
+  display: none;
+}
+
+.sec-head h2 {
+  color: var(--mute);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+
+.sec-rule {
+  height: 1px;
+  flex: 1;
+  background: var(--hairline);
+}
+
+.sec-count,
+.osiso-count {
+  min-width: 28px;
+  padding: 3px 7px;
+  color: var(--mute);
+  background: var(--elevated);
+  border: 1px solid var(--hairline-soft);
+  border-radius: 5px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  text-align: center;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.item {
+  position: relative;
+  min-width: 0;
+  min-height: 118px;
+  padding: 15px;
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) 20px;
+  grid-template-areas: "icon body box";
+  align-items: start;
+  gap: 13px;
+  overflow: hidden;
+  color: var(--body);
+  background: color-mix(in srgb, var(--elevated) 55%, transparent);
+  border: 1px solid var(--glass-edge);
+  border-radius: 11px;
+  box-shadow: var(--sh-1);
+  text-align: left;
+  -webkit-backdrop-filter: blur(12px) saturate(145%);
+  backdrop-filter: blur(12px) saturate(145%);
+  transition: var(--t-int);
+}
+
+.item::before {
+  position: absolute;
+  inset: 0;
+  content: '';
+  pointer-events: none;
+  background: var(--grad-soft);
+  opacity: 0;
+  transition: opacity var(--t);
+}
+
+.item::after {
+  display: none !important;
+}
+
+.item:hover {
+  border-color: color-mix(in srgb, var(--primary) 45%, transparent);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, .24), 0 0 16px var(--primary-soft);
+  transform: translateY(-2px);
+}
+
+.item:hover::before,
+.item[aria-checked='true']::before {
+  opacity: 1;
+}
+
+.item[aria-checked='true'] {
+  border-color: color-mix(in srgb, var(--primary) 70%, transparent);
+  box-shadow: inset 0 0 15px var(--primary-soft), 0 0 14px var(--primary-soft);
+}
+
+.item[disabled] {
+  opacity: .45;
+  filter: grayscale(.5);
+  cursor: not-allowed;
+}
+
+.item .box {
+  position: relative;
+  z-index: 2;
+  grid-area: box;
+  width: 19px;
+  height: 19px;
+  margin: 1px 0 0;
+  display: grid;
+  place-items: center;
+  color: var(--on-primary);
+  background: var(--deep);
+  border: 1px solid var(--hairline-strong);
+  border-radius: 5px;
+}
+
+.item[aria-checked='true'] .box {
+  background: var(--primary);
+  border-color: var(--primary);
+}
+
+.item[aria-checked='true'] .box::after {
+  width: 10px;
+  height: 10px;
+  content: '';
+  background: var(--on-primary);
+  -webkit-mask: var(--ico-check) center / contain no-repeat;
+  mask: var(--ico-check) center / contain no-repeat;
+}
+
+.item .icon {
+  position: relative;
+  z-index: 2;
+  grid-area: icon;
+  width: 48px;
+  height: 48px;
+  padding: 8px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  color: var(--ink);
+  background: var(--elevated);
+  border: 1px solid var(--hairline);
+  border-radius: 9px;
+}
+
+.item .icon svg,
+.item .icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.item .body {
+  position: relative;
+  z-index: 2;
+  grid-area: body;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.item .nm {
+  overflow: hidden;
+  color: var(--ink);
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.item[aria-checked='true'] .nm {
+  color: var(--primary);
+}
+
+.item .desc {
+  overflow: hidden;
+  margin-top: 5px;
+  color: var(--mute);
+  font-size: 11.5px;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.item .tags {
+  margin-top: 11px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.tag {
+  padding: 2px 5px;
+  color: var(--mute);
+  background: var(--elevated);
+  border: 1px solid var(--hairline-soft);
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 8px;
+  line-height: 1.2;
+}
+
+.item[aria-checked='true'] .tag:first-child {
+  color: var(--primary);
+  background: var(--primary-soft);
+  border-color: color-mix(in srgb, var(--primary) 35%, transparent);
+}
+
+.stamp {
+  position: absolute;
+  z-index: 2;
+  right: 12px;
+  bottom: 10px;
+  color: var(--red);
+  font-family: var(--font-mono);
+  font-size: 8px;
+  text-transform: uppercase;
+}
+
+/* Bottom action dock */
+.foot {
+  position: fixed;
+  z-index: 105;
+  right: 0;
+  bottom: 0;
+  left: var(--sidebar-w);
+  height: var(--footer-h);
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  color: var(--mute);
+  background: color-mix(in srgb, var(--deep) 90%, transparent);
+  border-top: 1px solid var(--hairline);
+  font-size: 10px;
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+}
+
+.stack {
+  position: fixed;
+  z-index: 115;
+  right: 24px;
+  bottom: 14px;
+  left: auto;
+  top: auto;
+  width: auto;
+  max-width: calc(100vw - var(--sidebar-w) - 380px);
+  height: 52px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  overflow: visible;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.stack-head {
+  height: 40px;
+  padding: 0 15px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  border-radius: 999px;
+}
+
+.stack-head h2 {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .045em;
+  text-transform: uppercase;
+}
+
+.stack-head .n {
+  color: var(--primary);
+  font-size: 9px;
+}
+
+.stack-body {
+  display: none;
+}
+
+.stack-foot {
+  padding: 0;
+  display: flex;
+  gap: 10px;
+  background: transparent;
+  border: 0;
+}
+
+.stack-foot .btn {
+  height: 40px;
+  border-radius: 999px;
+}
+
+.stack-foot .btn-primary {
+  min-width: 150px;
+  box-shadow: 0 10px 28px var(--primary-soft), 0 0 18px var(--primary-soft);
+}
+
+/* Empty state */
+.empty {
+  padding: 44px;
+  color: var(--mute);
+  background: var(--surface);
+  border: 1px dashed var(--hairline-strong);
+  border-radius: 12px;
+  text-align: center;
+}
+
+.empty .btn {
+  margin-top: 14px;
+}
+
+/* OS and desktop catalog views */
+.osiso,
+.desec {
+  width: 100%;
+  margin: 0;
+  padding: 24px;
+  background: color-mix(in srgb, var(--surface) 75%, transparent);
+  border: 1px solid var(--hairline);
+  border-radius: 14px;
+  box-shadow: var(--sh-1);
+}
+
+.osiso > .sec-head h2,
+.desec > .sec-head h2 {
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 24px;
+  letter-spacing: -.02em;
+  text-transform: none;
+}
+
+.osiso > .sub,
+.desec > .sub {
+  color: var(--mute);
+  font-size: 13px;
+}
+
+.osiso-note {
+  margin: 16px 0;
+  padding: 11px 13px;
+  color: var(--yellow);
+  background: var(--yellow-soft);
+  border: 1px solid color-mix(in srgb, var(--yellow) 40%, transparent);
+  border-radius: 8px;
+  font-size: 11px;
+}
+
+.osiso-bar {
+  margin: 18px 0 14px;
+  display: flex;
+  gap: 12px;
+}
+
+.osiso-tabs {
+  display: flex;
+  gap: 5px;
+}
+
+.osiso-tab,
+.osiso-chip {
+  min-height: 38px;
+  padding: 0 12px;
+  color: var(--mute);
+  background: var(--deep);
+  border: 1px solid var(--hairline);
+  border-radius: 7px;
+  font-size: 11px;
+}
+
+.osiso-tab[aria-pressed='true'],
+.osiso-chip[aria-pressed='true'] {
+  color: var(--primary);
+  background: var(--primary-soft);
+  border-color: color-mix(in srgb, var(--primary) 55%, transparent);
+}
+
+.osiso-tab > span:first-child {
+  width: 17px;
+  height: 17px;
+}
+
+.osiso-tab .n {
+  margin-left: 4px;
+  color: inherit;
+  font-family: var(--font-mono);
+  font-size: 8px;
+}
+
+.osiso-search {
+  position: relative;
+  min-width: 220px;
+  flex: 1;
+}
+
+.osiso-filters {
+  margin: 0 0 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.osiso-fgroup {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.osiso-flabel {
+  width: 82px;
+  color: var(--mute);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  text-transform: uppercase;
+}
+
+.osiso-chip {
+  min-height: 30px;
+  padding: 0 9px;
+  font-size: 9px;
+}
+
+.osiso-grid,
+.de-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.osrel,
+.de-card {
+  position: relative;
+  min-height: 180px;
+  padding: 15px;
+  color: var(--body);
+  background: var(--elevated);
+  border: 1px solid var(--glass-edge);
+  border-radius: 10px;
+  box-shadow: var(--sh-1);
+  transition: var(--t-int);
+}
+
+.osrel:hover,
+.de-card:hover {
+  border-color: color-mix(in srgb, var(--primary) 45%, transparent);
+  box-shadow: var(--sh-2), var(--sh-glow);
+  transform: translateY(-2px);
+}
+
+.osrel::after,
+.de-card::after {
+  display: none !important;
+}
+
+.osrel-top,
+.de-hd {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.osrel-icon {
+  width: 34px;
+  height: 34px;
+  padding: 7px;
+  color: var(--primary);
+  background: var(--primary-soft);
+  border-radius: 7px;
+}
+
+.osrel-hd {
+  min-width: 0;
+  flex: 1;
+}
+
+.osrel-hd h3,
+.de-hd h4 {
+  color: var(--ink);
+  font-size: 14px;
+  line-height: 1.3;
+}
+
+.osrel-meta,
+.osrel-src,
+.de-yr {
+  color: var(--mute);
+  font-family: var(--font-mono);
+  font-size: 8px;
+}
+
+.osrel-badge,
+.de-kind {
+  padding: 3px 6px;
+  color: var(--primary);
+  background: var(--primary-soft);
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 8px;
+}
+
+.osrel-desc,
+.de-card p {
+  margin: 13px 0;
+  color: var(--mute);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.osrel-links {
+  margin-top: 13px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.lk {
+  min-height: 30px;
+  padding: 0 9px;
+  color: var(--ink);
+  background: var(--deep);
+  border: 1px solid var(--hairline);
+  border-radius: 6px;
+  font-family: var(--font-mono);
+  font-size: 8px;
+}
+
+.lk:hover {
+  color: var(--primary);
+  border-color: var(--primary);
+}
+
+/* Dialogs and desktop run surfaces */
+.overlay,
+.rp-overlay {
+  background: var(--scrim);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+
+.sheet-m,
+.menu-pop,
+.rp-sheet {
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  border-radius: 12px;
+  box-shadow: var(--sh-3);
+}
+
+.sheet-head,
+.rp-head {
+  color: var(--ink);
+  background: var(--elevated);
+  border-bottom: 1px solid var(--hairline);
+}
+
+.sheet-head h3,
+.rp-head h3,
+.rp-head .rp-sub {
+  color: var(--ink);
+}
+
+.sheet-foot,
+.rp-foot {
+  background: var(--deep);
+  border-top: 1px solid var(--hairline);
+}
+
+.code,
+.rp-code {
+  background: var(--code-bg);
+  border: 1px solid var(--hairline);
+  border-radius: 8px;
+}
+
+.rp-x {
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+}
+
+.menu-link {
+  background: var(--elevated);
+  border: 1px solid var(--hairline);
+  border-radius: 8px;
+}
+
+.menu-link:hover {
+  background: var(--primary-soft);
+  border-color: var(--primary);
+  box-shadow: var(--sh-glow);
+  transform: translateY(-1px);
+}
+
+#hp-card {
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  border-radius: 10px;
+  box-shadow: var(--sh-3);
+}
+
+/* Intermediate desktop sizes */
+@media (max-width: 1180px) {
+  :root {
+    --sidebar-w: 238px;
+  }
+
+  .grid,
+  .osiso-grid,
+  .de-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .cover {
+    padding-right: 250px;
+  }
+
+  .hero-stat {
+    width: 70px;
+  }
+
+  .stack {
+    max-width: calc(100vw - var(--sidebar-w) - 250px);
+  }
+}
+
+/* Compact/tablet shell */
+@media (max-width: 820px) {
+  :root {
+    --sidebar-w: 0px;
+  }
+
+  .side-brand {
+    display: none;
+  }
+
+  .masthead,
+  html.aos-app .masthead {
+    left: 0;
+  }
+
+  .masthead-in {
+    padding: 0 14px;
+  }
+
+  .masthead .seg button {
+    min-width: 66px;
+    padding: 0 10px;
+  }
+
+  .mast-link {
+    display: none;
+  }
+
+  .wrap,
+  html.aos-app .wrap {
+    width: 100%;
+    margin-left: 0;
+    padding: calc(var(--topbar-h) + 16px) 14px 24px;
+    grid-template-areas:
+      "bar"
+      "cover"
+      "shipto"
+      "cats"
+      "osiso"
+      "desec"
+      "groups"
+      "empty"
+      "foot";
+    gap: 16px;
+  }
+
+  .shipto {
+    position: static;
+    grid-area: shipto;
+    width: 100%;
+    min-height: 0;
+    padding: 12px;
+    background: var(--surface);
+    border: 1px solid var(--hairline);
+    border-radius: 10px;
+  }
+
+  .os-row {
+    flex-direction: row;
+  }
+
+  .os-btn {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .cats {
+    position: static;
+    grid-area: cats;
+    width: 100%;
+    padding: 10px;
+    display: flex;
+    flex-direction: row;
+    overflow-x: auto;
+    overflow-y: hidden;
+    background: var(--surface);
+    border: 1px solid var(--hairline);
+    border-radius: 10px;
+  }
+
+  .cats::before {
+    display: none;
+  }
+
+  .cat {
+    width: auto;
+    min-width: max-content;
+  }
+
+  .cover {
+    padding-right: 24px;
+    padding-bottom: 120px;
+  }
+
+  .hero-stats {
+    right: 24px;
+    bottom: 22px;
+    left: 24px;
+  }
+
+  .hero-stat {
+    width: auto;
+    min-height: 68px;
+    flex: 1;
+  }
+
+  .foot {
+    left: 0;
+  }
+
+  .stack {
+    max-width: calc(100vw - 28px);
+  }
+}
+
+@media (max-width: 620px) {
+  :root {
+    --footer-h: 72px;
+  }
+
+  .masthead .seg button {
+    min-width: 45px;
+    padding: 0 7px;
+  }
+
+  .masthead .seg-view .vt {
+    display: none;
+  }
+
+  .masthead .seg-view svg {
+    display: block;
+  }
+
+  .lang-select,
+  .menu-btn {
+    display: none;
+  }
+
+  .orderbar {
+    flex-wrap: wrap;
+  }
+
+  .search {
+    flex-basis: 100%;
+  }
+
+  .orderbar .btn {
+    flex: 1;
+  }
+
+  .cover {
+    min-height: 340px;
+    padding: 24px 18px 112px;
+  }
+
+  .cover h1 {
+    font-size: 32px;
+  }
+
+  .hero-stats {
+    right: 18px;
+    left: 18px;
+    gap: 7px;
+  }
+
+  .hero-stat {
+    padding: 9px 5px;
+  }
+
+  .hero-stat strong {
+    font-size: 22px;
+  }
+
+  .grid,
+  .osiso-grid,
+  .de-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .osiso,
+  .desec {
+    padding: 16px;
+  }
+
+  .osiso-bar {
+    flex-direction: column;
+  }
+
+  .osiso-tabs {
+    width: 100%;
+  }
+
+  .osiso-tab {
+    flex: 1;
+  }
+
+  .osiso-search {
+    min-width: 0;
+  }
+
+  .foot {
+    padding-left: 14px;
+    font-size: 8px;
+  }
+
+  .stack {
+    right: 10px;
+    bottom: 10px;
+    gap: 6px;
+  }
+
+  .stack-head {
+    display: none;
+  }
+
+  .stack-foot {
+    gap: 6px;
+  }
+
+  .stack-foot .btn {
+    padding: 0 11px;
+  }
+
+  .stack-foot .btn-primary {
+    min-width: 126px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .item,
+  .osrel,
+  .de-card,
+  .btn,
+  .cat,
+  .os-btn {
+    transition: none;
+  }
+
+  .cover-canvas {
+    display: none;
+  }
+}
+
+/* ===========================================================================
+   Desktop shell overrides — keep this block last.
+
+   index.html ships the web build's stylesheet INLINE, so those rules come after
+   this file in document order and win every specificity tie. The desktop shell
+   therefore lost `.cats { position: fixed }` to the inline `.cats { position:
+   static }`: the category list dropped back into the page grid, NSIS-style
+   implicit columns appeared (`316px 0px 238px` instead of one full-width
+   column) and the whole content area collapsed to a third of the window.
+
+   Re-stating the shell's layout behind `html.aos-app` outranks a bare class
+   selector, so the rules below always win. Layout only — no palette changes.
+   =========================================================================== */
+
+html.aos-app .shipto {
+  position: fixed;
+  z-index: 140;
+  top: calc(var(--shell-top) + 88px);
+  left: 0;
+  width: var(--sidebar-w);
+  /* The inline sheet lays this out as a row, which puts the "SHIP TO" caption
+     beside the platform buttons instead of above them. */
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: 10px;
+  padding: 16px 16px 20px;
+}
+
+html.aos-app .shipto .os-row {
+  width: 100%;
+  flex-direction: column;
+  gap: 8px;
+}
+
+html.aos-app .shipto .os-btn {
+  width: 100%;
+  justify-content: flex-start;
+}
+
+html.aos-app .cats {
+  position: fixed;
+  z-index: 140;
+  /* Clears the taller stacked SHIP TO block above it. */
+  top: calc(var(--shell-top) + 330px);
+  bottom: 0;
+  left: 0;
+  width: var(--sidebar-w);
+  max-height: none;
+  align-items: stretch;
+  padding: 14px 14px 28px;
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  gap: 2px;
+  overflow-y: auto;
+  background: var(--surface);
+  border-right: 1px solid var(--glass-edge);
+}
+
+html.aos-app .cat {
+  width: 100%;
+  min-width: 0;
+  justify-content: flex-start;
+}
+
+/* One content column. Anything fixed to the rail is out of flow, so the grid
+   can never grow the extra implicit tracks that squeezed the page. */
+html.aos-app .wrap {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+/* The hero's art sits in the right padding; let it give way instead of
+   squeezing the headline down to one word per line. */
+html.aos-app .cover {
+  padding-right: clamp(0px, 26vw, 350px);
+}
+
+/* Cards reflow by available width rather than jumping 3 -> 2 at fixed
+   breakpoints, so no width leaves a cramped or half-empty row. */
+html.aos-app .grid,
+html.aos-app .osiso-grid,
+html.aos-app .de-grid {
+  grid-template-columns: repeat(auto-fill, minmax(258px, 1fr));
+}
+
+/* The fixed GitHub strip covered the last row of cards. */
+html.aos-app .foot {
+  display: none;
+}
+
+/* Below this width the rail costs more than it gives: stack it into the page
+   instead of overlaying the content. */
+@media (max-width: 900px) {
+  html.aos-app .shipto,
+  html.aos-app .cats {
+    position: static;
+    width: 100%;
+    border-right: 0;
+  }
+
+  html.aos-app .wrap {
+    width: 100%;
+    margin-left: 0;
+    grid-template-areas:
+      'bar'
+      'shipto'
+      'cats'
+      'cover'
+      'osiso'
+      'desec'
+      'groups'
+      'empty';
+  }
+
+  html.aos-app .shipto {
+    grid-area: shipto;
+  }
+
+  html.aos-app .cats {
+    grid-area: cats;
+    flex-direction: row;
+    flex-wrap: wrap;
+    overflow: visible;
+  }
+}
+
+
+/* --- Regressions the inline sheet caused in the desktop shell ------------- */
+
+/* Hover preview card. It parks at 0,0 when nothing is hovered, so it sat on the
+   wordmark, and while moving it floated over the card grid. Not wanted. */
+html.aos-app #hp-card {
+  display: none !important;
+}
+
+/* The toolbar stuck at 70px, i.e. underneath the 64px masthead that starts at
+   40px, so the search field was sliced in half on scroll. */
+html.aos-app .orderbar {
+  top: calc(var(--shell-top) + var(--topbar-h) + 8px);
+  z-index: 110;
+}
+
+/* "Generate script" lives in the stack dock. The inline sheet turned the dock
+   back into an in-flow sticky aside and it collapsed to nothing, leaving no way
+   to generate a script at all. !important because the losing rule outranks a
+   plain `html.aos-app .stack`. */
+html.aos-app .stack {
+  position: fixed;
+  z-index: 115;
+  inset: auto 0 0 var(--sidebar-w);
+  display: flex !important;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  width: auto;
+  max-width: none;
+  max-height: none;
+  overflow: visible;
+  padding: 12px 24px;
+  background: var(--surface);
+  border-top: 1px solid var(--hairline);
+  border-radius: 0;
+  box-shadow: none;
+}
+
+html.aos-app .stack-head {
+  height: auto;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  border: 0;
+}
+
+html.aos-app .stack-body {
+  display: none;
+}
+
+html.aos-app .stack-foot {
+  margin-left: auto;
+  padding: 0;
+  display: flex;
+  gap: 10px;
+  background: transparent;
+  border: 0;
+}
+
+/* Clear the docked action bar so the last row of cards is never behind it. */
+html.aos-app .wrap {
+  padding-bottom: 92px;
+}
+
+
+/* The dock's own heading repeated what the count already says; the bar reads as
+   one row of actions without it. (Kept in the DOM: .stack is aria-labelledby it.) */
+html.aos-app #stackTitle {
+  display: none;
+}
+
+/* --- Card checkbox ---------------------------------------------------------
+   Two bugs, one cause: the inline sheet loads last, so its
+   `.box { position: absolute; top/right }` beat this sheet's grid placement -
+   the square anchored to whatever ancestor happened to be positioned and slid
+   out of the card - and its `.box::before` tick rendered on top of the
+   `.box::after` tick below, giving a double check. Put the box back in its grid
+   cell and keep a single tick. */
+html.aos-app .item {
+  position: relative;
+}
+
+html.aos-app .item .box {
+  position: relative;
+  inset: auto;
+  grid-area: box;
+}
+
+html.aos-app .item .box::before {
+  display: none;
+}
+
+/* --- Left rail -------------------------------------------------------------
+   SHIP TO and CATEGORIES used to be two independently fixed panels, each with
+   its own hard-coded `top`. Choosing Linux adds the distro row to SHIP TO, and
+   the extra height ran straight under CATEGORIES - the chips were sliced off.
+   run-panel.js wraps both in .aos-rail; here it becomes one fixed column where
+   SHIP TO keeps its natural height and CATEGORIES takes the rest and scrolls. */
+html.aos-app .aos-rail {
+  position: fixed;
+  z-index: 140;
+  top: calc(var(--shell-top) + 88px);
+  bottom: 0;
+  left: 0;
+  width: var(--sidebar-w);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--surface);
+  border-right: 1px solid var(--glass-edge);
+}
+
+html.aos-app .aos-rail .shipto {
+  position: static;
+  top: auto;
+  width: 100%;
+  flex: 0 0 auto;
+  border-right: 0;
+}
+
+html.aos-app .aos-rail .cats {
+  position: static;
+  top: auto;
+  bottom: auto;
+  width: 100%;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  border-right: 0;
+}
+
+@media (max-width: 900px) {
+  /* Compact shell: the rail joins the page flow like everything else. */
+  html.aos-app .aos-rail {
+    position: static;
+    width: 100%;
+    border-right: 0;
+    overflow: visible;
+  }
+
+  html.aos-app .aos-rail .cats {
+    overflow: visible;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Rail contrast fixes. Both of these read wrong because a colour was chosen
+   against a backdrop the element does not actually sit on.
+   --------------------------------------------------------------------------- */
+
+/* The count badge was styled for the soft tinted row this file gives a selected
+   category, but the page's own stylesheet wins that rule and paints the row a
+   solid var(--ink). So the badge ended up orange text over a translucent orange
+   tint over --ink: 3.54:1 on paper and 2:1 on carbon - the number was simply not
+   readable: measured 1.38:1 on paper and 1.06:1 on carbon, i.e. the count was
+   very nearly invisible. --on-primary is the palette's paired foreground for
+   the selected fill in both themes, so tying the badge text to it keeps the
+   pair legible whichever palette is active. */
+html.aos-app .cat[aria-pressed='true'] .cat-count {
+  color: var(--on-primary);
+  /* The tint is --ink, not --on-primary. Tinting with the text colour drags the
+     badge toward the text and the count loses contrast against the gradient
+     (measured 3.79-4.04:1 at the warmer stops). --ink is the palette's opposite
+     of --on-primary in each theme, so it darkens the orange on paper and
+     lightens it on carbon - both push away from the text. Worst stop, either
+     theme: 6.62:1. */
+  background: color-mix(in srgb, var(--ink) 22%, transparent);
+  border-color: color-mix(in srgb, var(--on-primary) 34%, transparent);
+}
+
+/* .distro-row used var(--deep), which is near-black in BOTH themes, while the
+   chips used --mute, which flips to a dark warm grey on the light palette. On
+   the light theme that put dark text on a dark panel (3.11:1). A permanently
+   dark panel inside a light theme is the actual mistake, so the panel becomes
+   theme-aware and the chips can use ordinary body text.
+   After: 9.99:1 light, 8.53:1 dark. */
+html.aos-app .distro-row {
+  background: var(--elevated);
+  border-color: var(--hairline-soft);
+}
+
+/* :not() is load-bearing - without it this rule also outranks the page's
+   .distro-btn[aria-pressed='true'] colour and repaints the selected chip's text
+   --body over its --ink fill, which measured 1.52:1. */
+html.aos-app .distro-btn:not([aria-pressed='true']) {
+  color: var(--body);
+}
+
+/* Search field: two designs were painting at once. The page makes .search
+   itself the field - light pill, --ink border, icon, and a transparent
+   borderless input inside it - while this file styles the input as the field
+   (a --deep box with its own engraved inset shadow). The page wins background
+   and border because those selectors tie and it comes later, but nothing in the
+   page declares box-shadow on the input, so this file's inset shadow was the
+   only one left standing: a dark smear drawn at radius 10px on a transparent
+   box that sits inset from the pill and is 2px taller than it. That is why it
+   never lined up with the pill's edge. The pill already carries its own border
+   and its own :focus-within ring, so the input needs no shadow of its own. */
+html.aos-app .search input,
+html.aos-app .osiso-search input,
+html.aos-app .search input:focus,
+html.aos-app .osiso-search input:focus {
+  box-shadow: none;
+}
+
+/* Killing the shadow stopped the smear but left its cause in place: the input
+   still carried this file's field geometry - 46px tall inside a 44px pill, its
+   own 10px radius, and 46px of left padding to clear an absolutely positioned
+   icon. So it overhung the pill by 1px top and bottom and never sat inside it.
+   Hand the layout back to the page: the input becomes a plain text slot that
+   fills the pill, and the icon goes back to being a flex item the pill spaces
+   itself. */
+html.aos-app .search input,
+html.aos-app .osiso-search input {
+  height: auto;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+}
+
+html.aos-app .search::before,
+html.aos-app .osiso-search::before {
+  position: static;
+  transform: none;
+}
+
+/* Selected states were painted with --ink: a flat near-black on the light
+   palette, a flat cream on the dark one - the black/white look. The app's own
+   selected affordance is the brand gradient already used by the SHIP TO
+   buttons, so categories and distro chips now match it. --on-primary is the
+   palette's paired foreground for --grad as well, so the label and the count
+   badge rule above stay legible with no further change. */
+html.aos-app .cat[aria-pressed='true'],
+html.aos-app .distro-btn[aria-pressed='true'] {
+  color: var(--on-primary);
+  background: var(--grad);
+  border-color: var(--primary);
+}

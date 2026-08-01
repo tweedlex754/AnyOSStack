@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Question or discussion
+    url: https://github.com/tweedlex754/AnyOSStack/discussions
+    about: Ask questions and share ideas in Discussions.
+  - name: Security vulnerability
+    url: https://github.com/tweedlex754/AnyOSStack/security/advisories/new
+    about: Report security issues privately (do not open a public issue).

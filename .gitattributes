@@ -1,2 +1,19 @@
-# Auto detect text files and perform LF normalization
-* text=auto
+# Normalize line endings: LF in the repo, native on checkout.
+* text=auto eol=lf
+
+# Scripts that must stay LF even on Windows checkouts.
+*.sh text eol=lf
+*.py text eol=lf
+
+# Binary assets - never diff or touch line endings.
+*.woff2 binary
+*.png binary
+*.ico binary
+*.icns binary
+*.bmp binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+
+# Large generated renderer: keep out of diffs and language stats.
+src/renderer/index.html linguist-generated=true -diff

@@ -1,0 +1,8 @@
+# Shows a "Sponsor" button on the repo. Uncomment and fill the platforms you
+# actually use; leave everything commented to show no button. Docs:
+# https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/displaying-a-sponsor-button-in-your-repository
+
+# github: [your-username]        # GitHub Sponsors user/org
+# ko_fi: your-username
+# buy_me_a_coffee: your-username
+# custom: ["https://example.com/donate"]

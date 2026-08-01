@@ -1,0 +1,29 @@
+name: Feature request
+description: Suggest an idea or a new app for the catalog
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem would this solve?
+      description: Describe the use case or the pain point.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: What would you like AnyOSStack to do?
+    validations:
+      required: true
+  - type: input
+    id: app-ids
+    attributes:
+      label: (If requesting a new app) package ids
+      description: winget / brew / apt / dnf / pacman / flatpak ids you have verified.
+      placeholder: "winget: Publisher.App, brew: app"
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered

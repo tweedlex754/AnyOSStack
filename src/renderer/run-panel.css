@@ -1,0 +1,79 @@
+/* AnyOSStack desktop additions: the "Run Now" confirm/output surfaces and the
+   preset toolbar buttons. Everything here reuses the app's existing design
+   tokens (--ink, --red, --grad, --code-bg/ink, --s-*, --r-*, --sh-*, fonts) so
+   the desktop-only UI is indistinguishable from the original in both themes.
+   These styles are inert in a plain browser (no window.anyos) - the elements
+   they target are only created when running inside Electron. */
+
+/* Secondary/ghost button used for "Run Now" - visually subordinate to the
+   ember-filled primary (Download), keeping "safe by default" as the hierarchy. */
+.btn-ghost {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  height: 44px; padding: 0 18px;
+  border: 1.5px dashed var(--ink); border-radius: var(--r-md);
+  background: transparent; color: var(--ink);
+  font-size: 13px; font-weight: 700; white-space: nowrap; transition: var(--t-int);
+  cursor: pointer;
+}
+.btn-ghost:hover { background: var(--elevated); transform: translate(-2px, -2px); box-shadow: var(--sh-glow); }
+.btn-ghost:active { transform: translate(0, 0); box-shadow: none; }
+.btn-ghost:disabled { color: var(--ash); border-color: var(--hairline-strong); cursor: not-allowed; transform: none; box-shadow: none; }
+.btn-ghost svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+
+/* Preset buttons live in the order bar next to Select all / Clear. */
+.rp-preset-btn svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ---- Confirmation dialog + live output dialog (reuse .overlay/.sheet-m) ---- */
+.rp-overlay {
+  position: fixed; inset: 0; z-index: 400; background: var(--scrim);
+  -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px);
+  display: none; align-items: center; justify-content: center; padding: var(--s-xl);
+}
+.rp-overlay.on { display: flex; }
+.rp-sheet {
+  width: min(820px, 100%); max-height: 88vh; display: flex; flex-direction: column;
+  background: var(--surface);
+  border: 2px solid var(--ink); border-radius: var(--r-lg); box-shadow: var(--sh-3); overflow: hidden;
+}
+.rp-head { display: flex; align-items: center; justify-content: space-between; gap: var(--s-lg); padding: var(--s-lg); background: var(--grad); border-bottom: 2px solid var(--ink); }
+.rp-head h3 { font-family: var(--font-display); font-weight: 800; font-size: 21px; letter-spacing: -0.01em; color: var(--on-primary); }
+.rp-head .rp-sub { font-size: 12.5px; color: var(--on-primary); opacity: 0.85; margin-top: 3px; }
+.rp-body { overflow: auto; padding: var(--s-lg); overscroll-behavior: contain; }
+.rp-foot { display: flex; gap: var(--s-sm); justify-content: flex-end; align-items: center; padding: var(--s-lg); border-top: 1.5px solid var(--ink); background: var(--elevated); }
+.rp-foot .rp-spacer { margin-right: auto; }
+
+/* Warning note before running - reuses the yellow "note" idiom. */
+.rp-warn {
+  display: flex; gap: var(--s-sm); align-items: flex-start;
+  font-size: 12.5px; line-height: 1.5; color: var(--ink);
+  background: var(--yellow-soft); border: 1.5px solid var(--yellow);
+  border-radius: var(--r-md); padding: var(--s-md); margin-bottom: var(--s-md);
+}
+
+/* The read-only script + the live terminal both use the app's .code look. */
+.rp-code {
+  font-family: var(--font-mono); font-variant-ligatures: none;
+  font-size: 12.5px; line-height: 1.62; white-space: pre; overflow: auto;
+  padding: var(--s-lg); border-radius: var(--r-md); margin: 0;
+  background: var(--code-bg); color: var(--code-ink); border: 1.5px solid var(--ink);
+  max-height: 46vh;
+}
+.rp-term { min-height: 220px; }
+.rp-term .rp-err { color: var(--red); }
+
+/* Mandatory review checkbox. */
+.rp-review { display: flex; align-items: flex-start; gap: 10px; margin-top: var(--s-md); font-size: 13px; color: var(--ink); font-weight: 600; cursor: pointer; }
+.rp-review input { width: 18px; height: 18px; margin-top: 1px; accent-color: var(--primary); flex-shrink: 0; }
+
+.rp-status { font-size: 12.5px; font-weight: 700; color: var(--mute); }
+.rp-status.ok { color: var(--green); }
+.rp-status.err { color: var(--red); }
+
+.rp-x { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: var(--r-sm); flex-shrink: 0; background: rgba(255, 255, 255, 0.18); color: var(--on-primary); border: 1.5px solid rgba(255, 255, 255, 0.4); position: relative; cursor: pointer; }
+.rp-x::before, .rp-x::after { content: ''; position: absolute; width: 13px; height: 2px; background: currentColor; }
+.rp-x::before { transform: rotate(45deg); }
+.rp-x::after { transform: rotate(-45deg); }
+
+@media (prefers-reduced-motion: no-preference) {
+  .rp-overlay.on .rp-sheet { animation: rise var(--t-slow) both; }
+}

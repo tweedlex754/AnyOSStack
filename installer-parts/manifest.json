@@ -1,0 +1,47 @@
+{
+  "schema": 1,
+  "product": "AnyOSStack",
+  "version": "2.0.0",
+  "artifact": "AnyOSStack-Setup-2.0.0.exe",
+  "releaseAssetUrl": "https://github.com/tweedlex754/AnyOSStack/releases/latest/download/AnyOSStack-Setup-2.0.0.exe",
+  "totalSize": 146724471,
+  "sha256": "9f051cfadf562261a7d7b835d2e5c802dbc9316c04828e1a87d9734ab10312c8",
+  "partCount": 7,
+  "parts": [
+    {
+      "name": "AnyOSStack-Setup-2.0.0.exe.part01",
+      "size": 20971520,
+      "sha256": "f1b72852c4fa89395cbb09ab84c2d0aba86d2d6cafabbc2777f851ec24578aca"
+    },
+    {
+      "name": "AnyOSStack-Setup-2.0.0.exe.part02",
+      "size": 20971520,
+      "sha256": "2067e1c02a9de6b19b6dbcd786b261193a3cc8880660fca74d2bacb3de013d4e"
+    },
+    {
+      "name": "AnyOSStack-Setup-2.0.0.exe.part03",
+      "size": 20971520,
+      "sha256": "cb395d7a74fded67f2a10aab0e64f58cd6346cddb1685120ad2d90602f381be1"
+    },
+    {
+      "name": "AnyOSStack-Setup-2.0.0.exe.part04",
+      "size": 20971520,
+      "sha256": "c4b43145b805a115cba75e3e8a5516c48350c500011885f8b16c03c36d092c03"
+    },
+    {
+      "name": "AnyOSStack-Setup-2.0.0.exe.part05",
+      "size": 20971520,
+      "sha256": "8c267edb09136dc055f6d93592ec2d8d77facc222a21c925aee91977b6e3bbf3"
+    },
+    {
+      "name": "AnyOSStack-Setup-2.0.0.exe.part06",
+      "size": 20971520,
+      "sha256": "39843e822c64b9f8907ac153a5db16e8defbc906fb6549ba156da77a64519308"
+    },
+    {
+      "name": "AnyOSStack-Setup-2.0.0.exe.part07",
+      "size": 20895351,
+      "sha256": "1f0570994e0b5c853eb0cd4b2502f7a7d94573c7cbb8b70cffde6b41fbe44c4e"
+    }
+  ]
+}

@@ -1,0 +1,53 @@
+name: Bug report
+description: Report something that isn't working
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: Thanks for taking the time to file a bug! Please fill out the details below.
+  - type: input
+    id: version
+    attributes:
+      label: AnyOSStack version
+      description: See Help → About AnyOSStack.
+      placeholder: "1.0.0"
+    validations:
+      required: true
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating system
+      options:
+        - Windows 11
+        - Windows 10
+        - macOS
+        - Linux (AppImage)
+        - Linux (deb)
+        - Linux (rpm)
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: A clear description of the bug, and what you expected instead.
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Select apps '...'
+        2. Choose target '...'
+        3. Click '...'
+        4. See error
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant output or screenshots
+      description: Paste any error text or attach screenshots. Do not include secrets.
+      render: shell

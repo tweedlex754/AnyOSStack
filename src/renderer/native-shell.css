@@ -1,0 +1,83 @@
+/* Native-desktop shell. Turns the web page into an app window: a branded custom
+   title bar with window controls, no landing-page hero, no browser text
+   selection or right-click menu. Everything is scoped under html.aos-app, which
+   native-shell.js adds ONLY inside Electron - so in a plain browser the page is
+   untouched. Colors reuse the app's own brand tokens. */
+
+:root {
+  --aos-titlebar-h: 40px;
+  --aos-tb-bg: #181410;       /* deep brand ink - a consistent dark app chrome */
+  --aos-tb-fg: #f7f3ea;       /* cream */
+  --aos-tb-mute: #b3a992;
+  --aos-tb-hover: rgba(247, 243, 234, 0.12);
+  --aos-tb-close: #e11d48;
+}
+
+/* Push all content below the fixed title bar and stop the window from behaving
+   like a scrolling web page. */
+html.aos-app, html.aos-app body {
+  overscroll-behavior: none;
+}
+html.aos-app body {
+  padding-top: var(--aos-titlebar-h);
+  user-select: none;               /* chrome is not selectable... */
+  cursor: default;
+}
+/* ...but real content (inputs, the script, editable areas) stays selectable. */
+html.aos-app input,
+html.aos-app textarea,
+html.aos-app [contenteditable],
+html.aos-app .code,
+html.aos-app .rp-code {
+  user-select: text;
+}
+
+/* The app's sticky header now docks just under the title bar, not the viewport top. */
+html.aos-app .masthead { top: var(--aos-titlebar-h); }
+
+/* Drop the marketing hero so the app opens straight into the tool. */
+html.aos-app .cover { display: none !important; }
+html.aos-app .wrap { padding-top: var(--s-lg); }
+
+/* ---------------------------- title bar ---------------------------- */
+.aos-titlebar {
+  position: fixed; top: 0; left: 0; right: 0; height: var(--aos-titlebar-h);
+  z-index: 1000;
+  display: flex; align-items: center;
+  background: var(--aos-tb-bg); color: var(--aos-tb-fg);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.5);
+  -webkit-app-region: drag;        /* the bar is the window drag handle */
+  user-select: none;
+}
+.aos-titlebar .aos-brand {
+  display: flex; align-items: center; gap: 9px;
+  padding: 0 12px; height: 100%;
+  pointer-events: none;
+}
+html.aos-mac .aos-titlebar .aos-brand { padding-left: 82px; } /* clear the traffic lights */
+.aos-titlebar .aos-brand svg { width: 18px; height: 18px; display: block; }
+.aos-titlebar .aos-brand b {
+  font-family: var(--font-display, Georgia, serif);
+  font-weight: 800; font-size: 13.5px; letter-spacing: 0.01em; color: var(--aos-tb-fg);
+}
+.aos-titlebar .aos-spacer { flex: 1; }
+
+/* Window controls (Windows/Linux). macOS uses native traffic lights instead. */
+.aos-winctl { display: flex; height: 100%; -webkit-app-region: no-drag; }
+html.aos-mac .aos-winctl { display: none; }
+.aos-winctl button {
+  width: 46px; height: 100%;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: transparent; border: 0; color: var(--aos-tb-fg);
+  cursor: default; transition: background 0.12s ease, color 0.12s ease;
+}
+.aos-winctl button:hover { background: var(--aos-tb-hover); }
+.aos-winctl button.aos-close:hover { background: var(--aos-tb-close); color: #fff; }
+.aos-winctl svg { width: 11px; height: 11px; fill: none; stroke: currentColor; stroke-width: 1.4; }
+.aos-winctl .aos-restore { display: none; }
+html.aos-maximized .aos-winctl .aos-restore { display: block; }
+html.aos-maximized .aos-winctl .aos-maxsq { display: none; }
+
+@media (prefers-color-scheme: light) {
+  /* keep the dark chrome even in light theme - a deliberate, consistent app bar */
+}

@@ -1,0 +1,44 @@
+{
+  "name": "anyosstack",
+  "productName": "AnyOSStack",
+  "version": "2.0.0",
+  "description": "One stack for every OS. Pick apps, get one idempotent install script for Windows, macOS, and Linux - or run it in-app.",
+  "author": "AnyOSStack contributors",
+  "license": "GPL-3.0-or-later",
+  "homepage": "https://github.com/tweedlex754/AnyOSStack",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tweedlex754/AnyOSStack.git"
+  },
+  "main": "src/main/main.js",
+  "scripts": {
+    "fetch-fonts": "node scripts/fetch-fonts.js",
+    "build-renderer": "node scripts/build-renderer.js",
+    "build-icons": "node scripts/build-icons.js",
+    "build-installer-lang": "node scripts/build-installer-lang.js",
+    "prebuild": "npm run build-icons && npm run build-installer-lang",
+    "start": "electron .",
+    "dist": "npm run prebuild && electron-builder",
+    "dist:win": "npm run prebuild && electron-builder --win",
+    "dist:mac": "npm run prebuild && electron-builder --mac",
+    "dist:linux": "npm run prebuild && electron-builder --linux",
+    "pack": "npm run prebuild && electron-builder --dir",
+    "dist:win-local": "node scripts/build-win-installer.js",
+    "build-installer-ui": "node scripts/generate-installer-ui.js",
+    "package:win": "node scripts/package-windows.js",
+    "download-release": "node scripts/download-release.js",
+    "split-installer": "node scripts/split-installer.js"
+  },
+  "devDependencies": {
+    "electron": "^43.2.0",
+    "electron-builder": "^26.15.3",
+    "png-to-ico": "^2.1.8",
+    "png2icons": "^2.0.1",
+    "sharp": "^0.35.3",
+    "simple-icons": "^16.27.1"
+  },
+  "dependencies": {
+    "electron-updater": "^6.3.9",
+    "sudo-prompt": "^9.2.1"
+  }
+}

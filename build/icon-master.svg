@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- AnyOSStack mark: the three cascading layers used by the desktop app. -->
+  <rect width="64" height="64" rx="6" fill="#181410"/>
+  <rect x="10" y="34" width="44" height="11" rx="2" fill="#c2410c"/>
+  <rect x="14" y="24" width="44" height="11" rx="2" fill="#ea580c"/>
+  <rect x="6" y="14" width="44" height="11" rx="2" fill="#f7f3ea"/>
+</svg>

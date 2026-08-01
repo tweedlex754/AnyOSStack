@@ -1,0 +1,45 @@
+name: Release
+
+# On a version tag (vX.Y.Z), build the real installers on each native OS and
+# attach them to a single GitHub Release. Each OS builds its own packages because
+# macOS (.icns/notarization) and Linux (dpkg/rpmbuild) tooling only runs reliably
+# on its own platform.
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write   # electron-builder uploads release assets via GITHUB_TOKEN
+
+jobs:
+  release:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, macos-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install Linux packaging deps
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends libfuse2 rpm
+
+      - run: npm ci
+
+      - name: Generate build assets (icons + installer strings)
+        run: npm run prebuild
+
+      - name: Build and publish installers
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npx electron-builder --publish always
